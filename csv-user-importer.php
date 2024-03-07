@@ -178,6 +178,7 @@ function csv_user_importer_page() {
 		<div id="delete-tab" class="tab-content" style="display: none;">
 			<h2><?php esc_html_e( 'Delete Users', 'zest-csv-connector' ); ?></h2>
 			<form method="post" enctype="multipart/form-data">
+				<h2><?php esc_html_e( 'Delete Users', 'zest-csv-connector' ); ?></h2>
 				<?php wp_nonce_field( 'delete_users_action', 'delete_users_nonce' ); ?>
 				<p>
 					<label for="csv_file"><?php esc_html_e( 'CSV File:', 'zest-csv-connector' ); ?></label>
@@ -196,19 +197,19 @@ function csv_user_importer_page() {
 		</div>
 
 		<script>
-				jQuery(document).ready(function($) {
-						$( '.nav-tab-wrapper a' ).on( 'click', function(e) {
-								e.preventDefault();
-								var tabId = $(this).attr( 'href' );
-								$( '.nav-tab-wrapper a' ).removeClass( 'nav-tab-active' );
-								$(this).addClass( 'nav-tab-active' );
-								$( '.tab-content' ).hide();
-								$(tabId).show();
-						});
-
-						// Show the Import tab by default
-						$( '#import-tab' ).show();
+			jQuery(document).ready(function($) {
+				$( '.nav-tab-wrapper a' ).on( 'click', function(e) {
+					e.preventDefault();
+					var tabId = $(this).attr( 'href' );
+					$( '.nav-tab-wrapper a' ).removeClass( 'nav-tab-active' );
+					$(this).addClass( 'nav-tab-active' );
+					$( '.tab-content' ).hide();
+					$(tabId).show();
 				});
+
+				// Show the Import tab by default
+				$( '#import-tab' ).show();
+			});
 		</script>
 
 	</div>
@@ -225,27 +226,20 @@ function csv_user_importer_handle_import() {
 			return;
 		}
 
-		$file = isset( $_FILES['csv_file']['tmp_name'] ) ? sanitize_file_name( $_FILES['csv_file']['tmp_name'] ) : '';
+		$file = $_FILES['csv_file']['tmp_name'];
 
 		// Check for file errors.
-		if ( ! isset( $_FILES['csv_file']['error'] ) || UPLOAD_ERR_OK !== $_FILES['csv_file']['error'] ) {
-			echo '<div class="error"><p>' . esc_html__( 'Failed to upload the CSV file.', 'zest-csv-connector' ) . '</p></div>';
+		if ( ! file_exists( $file ) ) {
+			echo '<div class="error"><p>' . esc_html__( 'Failed to open the CSV file.', 'zest-csv-connector' ) . '</p></div>';
 			return;
 		}
 
 		// Check file size.
 		$max_file_size = 1048576; // 1MB
-		if ( $_FILES['csv_file']['size'] > $max_file_size ) {
+		if ( filesize( $file ) > $max_file_size ) {
 			echo '<div class="error"><p>' . esc_html__( 'CSV file size exceeds the maximum limit of 1MB.', 'zest-csv-connector' ) . '</p></div>';
 			return;
 		}
-
-		// // Validate file type.
-		// $file_info = wp_check_filetype( basename( $file ), array( 'csv' ) );
-		// if ( $file_info['ext'] !== 'csv' ) {
-		// echo '<div class="error"><p>Invalid file type. Only CSV files are allowed.</p></div>';
-		// return;
-		// }
 
 		$handle = fopen( $file, 'r' );
 		if ( false !== $handle ) {
@@ -264,8 +258,6 @@ function csv_user_importer_handle_import() {
 				// Skip the first row if the CSV has a header.
 				fgetcsv( $handle );
 			}
-
-			$email_sent = 0; // Counter for successful email sends.
 
 			while ( ( $data = fgetcsv( $handle, 1000, ',' ) ) !== false ) {
 				$username   = isset( $data[ $username_column ] ) ? $data[ $username_column ] : '';
@@ -314,7 +306,6 @@ function csv_user_importer_handle_import() {
 }
 add_action( 'admin_init', 'csv_user_importer_handle_import' );
 
-
 /**
  * Export users as a CSV file.
  */
@@ -350,18 +341,18 @@ add_action( 'admin_post_export_users', 'csv_user_importer_handle_export' );
  * Delete Users
  */
 function csv_user_importer_handle_delete_users() {
-	if ( isset( $_POST['submit']) && isset( $_FILES['csv_file'] ) ) {
+	if ( isset( $_POST['submit'] ) && isset( $_FILES['csv_file'] ) && wp_verify_nonce( wp_unslash( $_POST['delete_users_nonce'], 'delete_users_action' ) ) ) {
 		$file = $_FILES['csv_file'];
 		$csv_file = fopen( $file['tmp_name'], 'r' );
 
 		if ( $csv_file ) {
 			// Skip the header row if it exists.
-			if ( 'on' === isset( $_POST['has_header'] ) && $_POST['has_header'] ) {
+			if ( isset( $_POST['has_header'] ) && wp_unslash( $_POST['has_header'] ) === 'on' ) {
 				fgetcsv( $csv_file );
 			}
 
 			$username_column = isset( $_POST['username_column'] ) ? intval( $_POST['username_column'] ) - 1 : 0;
-			$deleted_count = 0;
+			$deleted_count   = 0;
 
 			while ( ( $data = fgetcsv( $csv_file ) ) !== false ) {
 				$username = isset( $data[ $username_column ] ) ? trim( $data[ $username_column ] ) : '';
