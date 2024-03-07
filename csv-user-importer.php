@@ -1,6 +1,6 @@
 <?php
 /**
- * Plugin Name: Import and Export users via CSV
+ * Plugin Name: Zest Csv Connector
  * Plugin URI: https://zestplugins.com/
  * Description: Import and export users easily using CSV files.
  * Tags:  import, export, users, csv export, csv import, user export, user import, user management
@@ -17,13 +17,92 @@
  * @package ZestCsvConnector
  */
 
-// Exit if accessed directly.
+ // Exit if accessed directly.
 defined( 'ABSPATH' ) || exit;
+
+if ( ! function_exists( 'zes_fs' ) ) {
+	// Create a helper function for easy SDK access.
+	function zes_fs() {
+		global $zes_fs;
+
+		if ( ! isset( $zes_fs ) ) {
+			// Activate multisite network integration.
+			if ( ! defined( 'WP_FS__PRODUCT_15130_MULTISITE' ) ) {
+				define( 'WP_FS__PRODUCT_15130_MULTISITE', true );
+			}
+
+			// Include Freemius SDK.
+			require_once dirname(__FILE__) . '/freemius/start.php';
+
+			$zes_fs = fs_dynamic_init( array(
+				'id'                  => '15130',
+				'slug'                => 'zestcsvconnector',
+				'type'                => 'plugin',
+				'public_key'          => 'pk_1fabaf2cf4254c0722d54a41ff057',
+				'is_premium'          => true,
+				'premium_suffix'      => 'starter',
+				// If your plugin is a serviceware, set this option to false.
+				'has_premium_version' => true,
+				'has_addons'          => false,
+				'has_paid_plans'      => true,
+				'trial'               => array(
+					'days'               => 7,
+					'is_require_payment' => false,
+				),
+				'menu'                => array(
+					'first-path'     => 'users.php?page=csv_user_importer',
+					'support'        => false,
+				),
+			) );
+		}
+
+		return $zes_fs;
+	}
+
+	// Init Freemius.
+	zes_fs();
+	// Signal that SDK was initiated.
+	do_action( 'zes_fs_loaded' );
+}
 
 /**
  * Define the current plugin version.
  */
 define( 'ZESTCSVCONNECTOR_VERSION', '1.0' );
+
+/**
+ * Add custom action link to the plugin's action links.
+ *
+ * @param array $links Existing plugin action links.
+ * @return array Modified plugin action links.
+ */
+function zest_csv_connector_management_add_actions_link( $links ) {
+	$settings_link     = '<a href="' . admin_url( 'users.php?page=csv_user_importer' ) . '">' . esc_html__( 'Settings', 'zest-csv-connector' ) . '</a>';
+	array_push( $links, $settings_link );
+	return $links;
+}
+add_filter( 'plugin_action_links_' . plugin_basename( __FILE__ ), 'zest_csv_connector_management_add_actions_link' );
+
+/**
+ * Redirect to the settings page after plugin activation.
+ */
+function zest_csv_connector_redirect_to_help_page() {
+	if ( is_admin() && get_option( 'zest_csv_connector_activation_redirect', false ) ) {
+		delete_option( 'zest_csv_connector_activation_redirect' );
+		wp_safe_redirect( admin_url( 'users.php?page=csv_user_importer' ) );
+		exit;
+	}
+}
+register_activation_hook( __FILE__, 'zest_csv_connector_set_activation_redirect' );
+
+/**
+ * Set the activation redirect flag.
+ */
+function zest_csv_connector_set_activation_redirect() {
+	update_option( 'zest_csv_connector_activation_redirect', true );
+}
+
+add_action( 'admin_init', 'zest_csv_connector_redirect_to_help_page' );
 
 /**
  * Register the plugin's main menu item
