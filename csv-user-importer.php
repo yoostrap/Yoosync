@@ -1,12 +1,12 @@
 <?php
 /**
- * Plugin Name: Zest Csv Connector
- * Plugin URI: https://zestplugins.com/
+ * Plugin Name: Yoosync
+ * Plugin URI: https://yoostrap.com/
  * Description: Import and export users easily using CSV files.
- * Tags:  import, export, users, csv export, csv import, user export, user import, user management
- * Version: 1.0
- * Author: zestplugins
- * Author URI: https://zestplugins.com/
+ * Tags:  import, export, user, csv
+ * Version: 0.1
+ * Author: Yoostrap
+ * Author URI: https://yoostrap.com/
  * License: GNU General Public License V3
  * License URI: https://www.gnu.org/licenses/gpl-3.0.html
  * Requires at least: 5.6
@@ -14,7 +14,7 @@
  * Text Domain: zest-csv-connector
  * Domain Path: /languages
  *
- * @package ZestCsvConnector
+ * @package Yoosync
  */
 
  // Exit if accessed directly.
