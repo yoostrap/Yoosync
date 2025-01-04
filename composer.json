@@ -1,0 +1,43 @@
+{
+    "name": "yoostrap/yoosync",
+    "type": "library",
+    "description": "Import and export WordPress data.",
+    "keywords": ["WordPress Import Export","Yoo","YooSync"],
+    "homepage": "http://github.com/yoostrap/yoosync/",
+    "license": "GPL-3.0+",
+    "authors": [
+        {
+            "name": "Lewis Ushindi",
+            "email": "frenziecodes@gmail.com",
+            "homepage": "http://github.com/frenziecodes/",
+            "role": "Developer"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "Yoostrap\\YooSync\\": ["includes/", "pro/"]
+        },
+        "classmap": [
+            "includes/",
+            "pro/"
+        ]
+    },
+    "extra": {
+        "installer-paths": {
+            "wp-content/plugins/{$name}/": ["type:wordpress-plugin"]
+        }
+    },
+    "require-dev": {
+    "squizlabs/php_codesniffer": "3.*",
+    "wp-coding-standards/wpcs": "2.*"
+    },
+    "config": {
+    "allow-plugins": {
+        "composer/installers": true
+    }
+    },
+    "require": {
+        "composer/installers": "^1.12",
+        "php": ">=5.3.0"
+    }
+}

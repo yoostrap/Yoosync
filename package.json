@@ -1,0 +1,10 @@
+{
+  "name": "yoosync",
+  "version": "0.1",
+  "title": "YooSync",
+  "description": "Import and export WordPress data.",
+  "repository": "https://github.com/yoostrap/yoosync",
+  "bugs": "https://github.com/yoostrap/yoosync/issues",
+  "author": "Yoostrap <info@yoostrap.com> (https://yoostrap.com)",
+  "license": "GPL"
+}

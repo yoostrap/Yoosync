@@ -2,8 +2,8 @@
 /**
  * Plugin Name: Yoosync
  * Plugin URI: https://yoostrap.com/
- * Description: Import and export users easily using CSV files.
- * Tags:  import, export, user, csv
+ * Description: Import and export WordPress data.
+ * Tags:  import, export, user, data
  * Version: 0.1
  * Author: Yoostrap
  * Author URI: https://yoostrap.com/
@@ -19,6 +19,11 @@
 
  // Exit if accessed directly.
 defined( 'ABSPATH' ) || exit;
+
+define( 'YSYS_PATH', plugin_dir_path( __FILE__ ) );
+
+// Include the auto loader
+require YSYS_PATH . 'vendor/autoload.php';
 
 if ( ! function_exists( 'zes_fs' ) ) {
 	// Create a helper function for easy SDK access.
